@@ -11,9 +11,12 @@
 
 require 'vendor/autoload.php';
 
-use My\Lib\ScriptsEnqueue\EnqueScript;
-use My\Lib\ScriptsEnqueue\EnqueStyle;
+use My\Lib\AdminPages\AdminMenuPage;
 use My\Lib\CustomPosts\CustomPost;
+use My\Lib\ScriptsEnqueue\EnqueStyle;
+use My\Lib\ScriptsEnqueue\EnqueScript;
+
+const MAINDIR = __DIR__;
 
 /* Enqueue parent style using custom class wrapper*/
 (new EnqueStyle(
@@ -48,4 +51,23 @@ use My\Lib\CustomPosts\CustomPost;
     true // 
 ))->setVersion(1.1)->setDisableOnAdmin()->enqueue();
 
+/* Register custom post */
 new CustomPost();
+
+/* Add Top Level Admin Menu Page */
+$adminPage = new AdminMenuPage("Child Theme Admin", "child_theme_admin", "My Settings");
+$adminPage->iconUrl = get_stylesheet_directory_uri(). '/assets/images/icons/wp-icon.png';
+$adminPage->position = 110;
+
+/* Add Top Level Admin Menu Page Content */
+$adminSubPage1 = new AdminMenuPage("Child Theme Admin", "child_theme_admin", "Home", $adminPage->slug);
+$adminSubPage1->addRawContent("<h1>{$adminPage->menuTitle} - {$adminSubPage1->menuTitle}</h1>");
+$adminSubPage1->addRawContent("<p>This is my demo content</p>");
+$adminSubPage1->body .= "asdasdasd";
+$adminSubPage1->body .= "asjdajsdasjd";
+
+/* Add Sub Page Admin Menu - Level down Page and Content */
+$adminSubPage2 = new AdminMenuPage("Theme Admin", "child_theme_admin-settings", "Basics", $adminPage->slug);
+$adminSubPage2->addRawContent("<h1>{$adminPage->menuTitle} - {$adminSubPage2->menuTitle}</h1>");
+$adminSubPage2->addRawContent("Some content goes here");
+$adminSubPage2->loadTemplate(get_stylesheet_directory().'/View/Admin/child-theme-setting-page-template.php');
