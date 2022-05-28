@@ -1,9 +1,13 @@
 /*
-Theme Name:     Divi-child
+Theme Name:     Child-Theme
 Theme URI:      
-Description:    Divi child theme.
+Description:    Child-Theme.
 Author:         Me
 Author URI:     
-Template:       Divi
+Template:       twentytwentytwo
 Version:        1.0
+*/
+
+/**
+* NOTE! To activate the child theme for your current theme. You need to replace above Template: xyz value with folder name of your active theme.
 */

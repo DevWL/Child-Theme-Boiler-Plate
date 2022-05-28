@@ -11,12 +11,17 @@
 
 require 'vendor/autoload.php';
 
-use My\Lib\AdminPages\AdminMenuPage;
 use My\Lib\CustomPosts\CustomPost;
+use My\Lib\Helpers\WpDebug\DebugWp;
+use My\Lib\AdminPages\AdminMenuPage;
 use My\Lib\ScriptsEnqueue\EnqueStyle;
 use My\Lib\ScriptsEnqueue\EnqueScript;
+use My\Lib\Helpers\WpEnchancments\AllowSVG;
 
 const MAINDIR = __DIR__;
+
+/* Enable Debuging */
+// (new DebugWp())->on();
 
 /* Enqueue parent style using custom class wrapper*/
 (new EnqueStyle(
@@ -70,4 +75,7 @@ $adminSubPage1->body .= "asjdajsdasjd";
 $adminSubPage2 = new AdminMenuPage("Theme Admin", "child_theme_admin-settings", "Basics", $adminPage->slug);
 $adminSubPage2->addRawContent("<h1>{$adminPage->menuTitle} - {$adminSubPage2->menuTitle}</h1>");
 $adminSubPage2->addRawContent("Some content goes here");
-$adminSubPage2->loadTemplate(get_stylesheet_directory().'/View/Admin/child-theme-setting-page-template.php');
+$adminSubPage2->loadTemplate(get_stylesheet_directory().'/View/Admin/main-setting-page-template.php'); // this template page has access to all wp functions
+
+/* Allow SVG Upload and Display */
+new AllowSVG();
