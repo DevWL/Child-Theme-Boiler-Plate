@@ -91,6 +91,20 @@ class AdminMenuPage extends BaseWpAbstarct
     }
 
     /**
+     * Undocumented function
+     *
+     * @param [type] $pathToTemplate
+     * @param [type] $args
+     * @return void
+     */
+    public function addTemplate($pathToTemplate, $args = [])
+    {
+        $this->args = $args;
+        $this->pathToTemplate = $pathToTemplate;
+        $this->addAction("admin_menu", "processTemplate");
+    }
+
+    /**
      * Load php template file
      * 
      * @see wp setup example https://www.youtube.com/watch?v=W2KfdcHDO3Y&list=PLriKzYyLb28kpEnFFi9_vJWPf5-_7d3rX&index=4
@@ -98,10 +112,14 @@ class AdminMenuPage extends BaseWpAbstarct
      *
      * @return void
      */
-    public function loadTemplate($pathToTemplate)
+    public function processTemplate()
     {
+        // add $args to the scope of included file;
+        $args = $this->args;
+        extract($args);
+
         ob_start();
-        include_once $pathToTemplate;
+        include_once $this->pathToTemplate;
         $this->body .= ob_get_contents();
         ob_clean();
     }

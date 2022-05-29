@@ -11,6 +11,7 @@
 
 require 'vendor/autoload.php';
 
+use My\Lib\Helpers\WpForms\Form;
 use My\Lib\CustomPosts\CustomPost;
 use My\Lib\Helpers\WpDebug\DebugWp;
 use My\Lib\AdminPages\AdminMenuPage;
@@ -75,7 +76,11 @@ $adminSubPage1->body .= "asjdajsdasjd";
 $adminSubPage2 = new AdminMenuPage("Theme Admin", "child_theme_admin-settings", "Basics", $adminPage->slug);
 $adminSubPage2->addRawContent("<h1>{$adminPage->menuTitle} - {$adminSubPage2->menuTitle}</h1>");
 $adminSubPage2->addRawContent("Some content goes here");
-$adminSubPage2->loadTemplate(get_stylesheet_directory().'/View/Admin/main-setting-page-template.php'); // this template page has access to all wp functions
+$adminSubPage2->addTemplate(
+    get_stylesheet_directory().'/View/Admin/main-setting-page-template.php',
+    ["page" => $adminSubPage2->slug]
+); // this template page has access to all wp functions
 
 /* Allow SVG Upload and Display */
 new AllowSVG();
+
