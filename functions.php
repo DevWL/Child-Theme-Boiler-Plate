@@ -15,14 +15,16 @@ use My\Lib\Helpers\WpForms\Form;
 use My\Lib\CustomPosts\CustomPost;
 use My\Lib\Helpers\WpDebug\DebugWp;
 use My\Lib\AdminPages\AdminMenuPage;
+use My\Lib\ShortCodes\NameShortcode;
 use My\Lib\ScriptsEnqueue\EnqueStyle;
 use My\Lib\ScriptsEnqueue\EnqueScript;
+use My\Lib\ShortCodes\GetOptionShortcode;
 use My\Lib\Helpers\WpEnchancments\AllowSVG;
 
 const MAINDIR = __DIR__;
 
 /* Enable Debuging */
-(new DebugWp())->on();
+// (new DebugWp())->on();
 
 /* Enqueue parent style using custom class wrapper*/
 (new EnqueStyle(
@@ -86,3 +88,7 @@ $adminSubPage2->renderPage(
 /* Allow SVG Upload and Display */
 new AllowSVG();
 
+new GetOptionShortcode("first_name");
+new GetOptionShortcode("last_name");
+new GetOptionShortcode("email");
+new GetOptionShortcode("phone");

@@ -31,4 +31,17 @@ class BaseWpAbstarct
     {
         add_filter($wpFilter, [$this, $methodName], $priority, $argsNum);
     }
+
+    /**
+     * Register method as sohrtcode
+     *
+     * @param string $tag    Shortcode name
+     * @param string $method Method to be trigered
+     * 
+     * @return void
+     */
+    public function registerShortcode($tag, $method)
+    {
+        add_shortcode($tag, [$this, $method]);
+    }
 }

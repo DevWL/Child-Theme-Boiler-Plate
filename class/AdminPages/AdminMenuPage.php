@@ -1,13 +1,12 @@
-<?php 
+<?php
 
 namespace My\Lib\AdminPages;
 
 use My\Lib\Helpers\BaseWpAbstarct;
-use My\Lib\Helpers\WpForms\Form;
 
 /**
  * Create a child theme admin page
- * 
+ *
  * @see https://www.youtube.com/watch?v=nvsK0cTH0So
  */
 class AdminMenuPage extends BaseWpAbstarct
@@ -21,11 +20,11 @@ class AdminMenuPage extends BaseWpAbstarct
     public $body = "";
 
     public $template = "";
-    public $args = []; 
+    public $args = [];
 
     /**
      * User access capability
-     * 
+     *
      * @see https://wordpress.org/support/article/roles-and-capabilities/#manage_options
      */
     const MANAGE_OPTIONS = 'manage_options';
@@ -59,7 +58,7 @@ class AdminMenuPage extends BaseWpAbstarct
             $this->slug,
             [$this, 'createPage'],
             $this->iconUrl, // string url or name fo the icon @see https://developer.wordpress.org/resource/dashicons/#editor-ol
-            $this->position // integer|null
+            $this->position// integer|null
         );
     }
 
@@ -71,14 +70,14 @@ class AdminMenuPage extends BaseWpAbstarct
      */
     public function addSubMenuPage()
     {
-        add_submenu_page( 
-            $this->parentSlug, 
+        add_submenu_page(
+            $this->parentSlug,
             $this->title,
-            $this->menuTitle, 
-            self::MANAGE_OPTIONS, 
-            $this->slug, 
+            $this->menuTitle,
+            self::MANAGE_OPTIONS,
+            $this->slug,
             [$this, 'createPage'],
-            $this->position 
+            $this->position
         );
     }
 
@@ -104,7 +103,7 @@ class AdminMenuPage extends BaseWpAbstarct
 
     /**
      * Load php template file
-     * 
+     *
      * @see wp setup example https://www.youtube.com/watch?v=W2KfdcHDO3Y&list=PLriKzYyLb28kpEnFFi9_vJWPf5-_7d3rX&index=4
      * @see rendering template files in php https://stackoverflow.com/questions/1312300/how-to-pass-parameters-to-php-template-rendered-with-include
      *
@@ -122,6 +121,10 @@ class AdminMenuPage extends BaseWpAbstarct
     /**
      * Whenn finished creating the page render page with this function
      *
+     * @param string  $template URL to php templet file in View\Admin direcotry
+     * @param mixed[] $args     An assosiative array destructed and pased 
+     *                          to the template
+     *
      * @return void
      */
     public function renderPage($template, $args)
@@ -130,11 +133,11 @@ class AdminMenuPage extends BaseWpAbstarct
         $this->template = $template;
         $this->args = $args;
 
-        if (!!!$this->parentSlug ) {
+        if (!!!$this->parentSlug) {
             $this->addAction('admin_menu', 'addAdminMenuPage');
         } else {
             $this->addAction('admin_menu', 'addSubMenuPage');
-        } 
+        }
     }
 
     /**
@@ -151,4 +154,3 @@ class AdminMenuPage extends BaseWpAbstarct
     }
 
 }
-
