@@ -3,6 +3,7 @@
 namespace My\Lib\AdminPages;
 
 use My\Lib\Helpers\BaseWpAbstarct;
+use My\Lib\Helpers\WpForms\Form;
 
 /**
  * Create a child theme admin page
@@ -17,8 +18,10 @@ class AdminMenuPage extends BaseWpAbstarct
     public $iconUrl = "";
     public $position = null;
     public $parentSlug = '';
-
     public $body = "";
+
+    public $template = "";
+    public $args = []; 
 
     /**
      * User access capability
@@ -39,12 +42,6 @@ class AdminMenuPage extends BaseWpAbstarct
         $this->slug = $slug;
         $this->menuTitle = $menuTitle;
         $this->parentSlug = $parentSlug;
-
-        if (!!!$this->parentSlug ) {
-            $this->addAction('admin_menu', 'addAdminMenuPage');
-        } else {
-            $this->addAction('admin_menu', 'addSubMenuPage');
-        } 
     }
 
     /**
@@ -101,7 +98,8 @@ class AdminMenuPage extends BaseWpAbstarct
     {
         $this->args = $args;
         $this->pathToTemplate = $pathToTemplate;
-        $this->addAction("admin_menu", "processTemplate");
+        // $this->addAction("admin_menu", "processTemplate");
+        $this->processTemplate();
     }
 
     /**
@@ -118,10 +116,25 @@ class AdminMenuPage extends BaseWpAbstarct
         $args = $this->args;
         extract($args);
 
-        ob_start();
         include_once $this->pathToTemplate;
-        $this->body .= ob_get_contents();
-        ob_clean();
+    }
+
+    /**
+     * Whenn finished creating the page render page with this function
+     *
+     * @return void
+     */
+    public function renderPage($template, $args)
+    {
+
+        $this->template = $template;
+        $this->args = $args;
+
+        if (!!!$this->parentSlug ) {
+            $this->addAction('admin_menu', 'addAdminMenuPage');
+        } else {
+            $this->addAction('admin_menu', 'addSubMenuPage');
+        } 
     }
 
     /**
@@ -131,7 +144,11 @@ class AdminMenuPage extends BaseWpAbstarct
      */
     public function createPage()
     {
-        echo $this->body;
+        $this->addTemplate(
+            $this->template,
+            $this->args
+        );
     }
+
 }
 

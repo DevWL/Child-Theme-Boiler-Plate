@@ -12,54 +12,80 @@ use My\Lib\Helpers\BaseWpAbstarct;
  */
 class Form extends BaseWpAbstarct
 {
-    public function __construct($page) {
-        $this->setPage($page);
-        $this->addAction("admin_init", "setCustomSettings");
-    }
 
-    public function setCustomSettings()
+    public $render = "not set!";
+
+    public function __construct($pageSlug)
     {
+        $this->setPageSlug($pageSlug);
         register_setting("my-settings-group", "first_name");
-        add_settings_section("my-settings-options", "My Options", [$this, "callbackAddSettingsSection"], $this->page);
-        add_settings_field("my-settings-input-name", "First Name", [$this, "callbackAddInputName"], $this->page, "my-settings-options");
-        $this->render = $this->addForm();
     }
 
+    /**
+     * Set form display page based on page slug 
+     *
+     * @param string $pageSlug slug of the page
+     * 
+     * @return void
+     */
+    public function setPageSlug($pageSlug)
+    {
+        $this->pageSlug = $pageSlug;
+    }
+
+    /**
+     * Trigers Form generation by colling object method usign build in WP functions
+     *
+     * @return void
+     */
+    public function renderForm()
+    {
+        
+        add_settings_section("my-settings-options", "My Options", [$this, "callbackAddSettingsSection"], $this->pageSlug);
+        add_settings_field("my-settings-input-name", "First Name", [$this, "callbackAddInputName"], $this->pageSlug, "my-settings-options");
+        add_settings_field("my-settings-input-surname", "Last Name", [$this, "callbackAddInputSurname"], $this->pageSlug, "my-settings-options");
+
+        $this->addAction("admin_init", "addForm");
+        return $this->addForm();
+    }
+
+    /**
+     * Undocumented function
+     *
+     * @return void
+     */
     public function callbackAddSettingsSection()
     {
         echo "Woooooooooooooooooooooo";
     }
 
+
+    /*************************************************************************** */
     public function callbackAddInputName()
     {
         $firstName = esc_attr(get_option('first_name'));
         echo "<input type='text' name='first_name' value='".$firstName."' placeholder='First name' />";
     }
 
-
-    public function renderForm()
+    public function callbackAddInputSurname()
     {
-        return $this->render;
+        $lastName = esc_attr(get_option('last_name'));
+        echo "<input type='text' name='first_name' value='".$lastName."' placeholder='Last name' />";
     }
-    
+    /*************************************************************************** */
 
     public function addForm()
     {
-        echo '<form method="POST" actoin="options.php">';
+        ob_start();
+        echo '<form method="POST" action="options.php">';
             settings_errors();
-            echo "render here ".  $this->page;
+            echo "render here ".  $this->pageSlug;
             settings_fields('my-settings-group');
-            do_settings_sections($this->page);
+            do_settings_sections($this->pageSlug);
             submit_button();
         echo '</form>';
+        $this->render = ob_get_contents(); 
+        ob_clean();
+        return $this->render;
     }
-
-    public function setPage($page)
-    {
-        $this->page = $page;
-    }
-
-
-
-
 }

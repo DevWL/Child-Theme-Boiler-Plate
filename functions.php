@@ -22,7 +22,7 @@ use My\Lib\Helpers\WpEnchancments\AllowSVG;
 const MAINDIR = __DIR__;
 
 /* Enable Debuging */
-// (new DebugWp())->on();
+(new DebugWp())->on();
 
 /* Enqueue parent style using custom class wrapper*/
 (new EnqueStyle(
@@ -64,22 +64,24 @@ new CustomPost();
 $adminPage = new AdminMenuPage("Child Theme Admin", "child_theme_admin", "My Settings");
 $adminPage->iconUrl = get_stylesheet_directory_uri(). '/assets/images/icons/wp-icon.png';
 $adminPage->position = 110;
+$adminPage->renderPage(
+    get_stylesheet_directory().'/View/Admin/main-setting-home.php', 
+    []
+);
 
-/* Add Top Level Admin Menu Page Content */
-$adminSubPage1 = new AdminMenuPage("Child Theme Admin", "child_theme_admin", "Home", $adminPage->slug);
-$adminSubPage1->addRawContent("<h1>{$adminPage->menuTitle} - {$adminSubPage1->menuTitle}</h1>");
-$adminSubPage1->addRawContent("<p>This is my demo content</p>");
-$adminSubPage1->body .= "asdasdasd";
-$adminSubPage1->body .= "asjdajsdasjd";
+/* Add Top Level Admin Menu Page shared subpage */
+$adminSubPage1 = new AdminMenuPage("Child Theme Admin", "$adminPage->slug", "Home", $adminPage->slug);
 
 /* Add Sub Page Admin Menu - Level down Page and Content */
 $adminSubPage2 = new AdminMenuPage("Theme Admin", "child_theme_admin-settings", "Basics", $adminPage->slug);
-$adminSubPage2->addRawContent("<h1>{$adminPage->menuTitle} - {$adminSubPage2->menuTitle}</h1>");
-$adminSubPage2->addRawContent("Some content goes here");
-$adminSubPage2->addTemplate(
-    get_stylesheet_directory().'/View/Admin/main-setting-page-template.php',
-    ["page" => $adminSubPage2->slug]
-); // this template page has access to all wp functions
+
+$adminSubPage2->renderPage(
+    get_stylesheet_directory().'/View/Admin/main-setting-basics.php',
+    [
+        "demoSlug" => $adminSubPage2->slug,
+        "form" => new Form($adminSubPage2->slug)
+    ]
+);
 
 /* Allow SVG Upload and Display */
 new AllowSVG();
