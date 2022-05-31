@@ -5,7 +5,7 @@ use My\Lib\Helpers\WpDebug\debugEnv;
 
 ?>
 
-<div id="<?= $pageslug ?>" class="custom-plugin-page <?= $pageslug ?>" style="background: #ccf; padding: 40px 60px; width 100%; margin-left: -20px;">
+<div id="<?= $pageslug ?>" class="custom-plugin-page <?= $pageslug ?>" style="width: 50%; float: left; box-sizing:border-box; background: #ccf; padding: 40px 60px; width 100%; margin-left: -20px;">
 
     <h1>Basics (main-setting-basics.php)</h1>
 
@@ -16,6 +16,10 @@ use My\Lib\Helpers\WpDebug\debugEnv;
         echo $form->renderForm();
     ?>
 
+</div>
+
+<div id="<?= $pageslug ?>" class="custom-plugin-page <?= $pageslug ?>" style="width: 50%; float: left; box-sizing:border-box; background: #0cf; padding: 40px 60px; width 100%;">
+<h1>Basics Two (main-setting-basics.php)</h1>
 </div>
 
 <?php
