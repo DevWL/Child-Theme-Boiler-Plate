@@ -22,9 +22,13 @@ class AbstractShortcode extends BaseWpAbstarct
      * 
      * @return string
      */
-    public function ShortCode()
+    public function shortCode()
     {
-        return get_option($this->name);
+        $value = get_option($this->name);
+        if ($value !== "") {
+            return get_option($this->name);
+        }
+         
     }
 
     /**
@@ -34,7 +38,7 @@ class AbstractShortcode extends BaseWpAbstarct
      */
     public function register()
     {
-        $this->registerShortcode($this->name, "ShortCode");
+        $this->registerShortcode($this->name, "shortCode");
     }
 
 

@@ -88,6 +88,7 @@ $adminSubPage2->renderPage(
 /* Allow SVG Upload and Display */
 new AllowSVG();
 
+// Register shortcodes for settings options
 new GetOptionShortcode("first_name");
 new GetOptionShortcode("last_name");
 new GetOptionShortcode("email");
@@ -98,5 +99,6 @@ new GetOptionShortcode("address1");
 new GetOptionShortcode("address2");
 new GetOptionShortcode("postcode");
 new GetOptionShortcode("city");
+new GetOptionShortcode("nip");
 new GetOptionShortcode("bank_name");
 new GetOptionShortcode("bank_account_num");
