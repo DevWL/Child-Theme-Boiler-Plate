@@ -56,6 +56,7 @@ const MAINDIR = __DIR__;
     Enqueue CSS styles 
     on specyfic ADMIN page 
 */
+<<<<<<< HEAD
 $adminSettingsStyles = (
     new EnqueStyle(
         'admin-settings',
@@ -67,6 +68,16 @@ $adminSettingsStyles = (
     )->enqueueOnAdmin()
     ->enqueueOnFront()
     ->enqueueIfStepInPath(["blog"])
+=======
+$adminSettingsStyles = (new EnqueStyle(
+    'admin-settings',
+    get_stylesheet_directory_uri() . '/assets/css/custom-admin-settings.css',
+    [],
+    1.1,
+    'all'
+))->enqueueOnAdmin()
+    ->enqueueOnFront()
+>>>>>>> 6795d79bf58b413c20aa6cae447600c3bc597039
     ->enqueueOnSpecyficPage(["child_theme_admin-settings", "kontakt"])
     ->excludeFromSpecyficPage(["kontakt"])
     ->add();
