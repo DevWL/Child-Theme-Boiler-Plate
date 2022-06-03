@@ -13,9 +13,9 @@ require 'vendor/autoload.php';
 
 use My\Lib\Helpers\WpForms\Form;
 use My\Lib\CustomPosts\CustomPost;
-use My\Lib\Helpers\WpDebug\DebugWp;
+// use My\Lib\Helpers\WpDebug\DebugWp;
 use My\Lib\AdminPages\AdminMenuPage;
-use My\Lib\ShortCodes\NameShortcode;
+// use My\Lib\ShortCodes\NameShortcode;
 use My\Lib\ScriptsEnqueue\EnqueStyle;
 use My\Lib\ScriptsEnqueue\EnqueScript;
 use My\Lib\ShortCodes\GetOptionShortcode;
@@ -26,30 +26,78 @@ const MAINDIR = __DIR__;
 /* Enable Debuging */
 // (new DebugWp())->on();
 
+/* *********************************** CSS ENQUEUE SCRIPTS *************************************** */
+
 /* Enqueue parent style using custom class wrapper*/
 (new EnqueStyle(
     'parent-style',
     get_template_directory_uri() . '/style.css'
-))->setVersion(1.1)->enqueue();
+))->setVersion(1.1)->enqueueOnFront()->add();
 
-/* Enqueue child theme front css styles */
+/* Enqueue css styles on frontend */
 (new EnqueStyle(
     'child-style',
     get_stylesheet_directory_uri() . '/assets/css/custom-front.css',
     ['parent-style'],
     1.1,
     'all'
-))->setDisableOnAdmin()->enqueue();
+))->enqueueOnFront()->add();
 
-/* Enqueue child theme admin css styles */
+/* Enqueue css styles in admin area */
 (new EnqueStyle(
     'child-admin-style',
     get_stylesheet_directory_uri() . '/assets/css/custom-admin.css',
-    ['parent-style'],
+    [],
     1.1,
     'all'
-))->setDisableOnFront()->enqueue();
+))->enqueueOnAdmin()->add();
 
+/* 
+    Enqueue CSS styles 
+    on specyfic ADMIN page 
+*/
+$adminSettingsStyles = (new EnqueStyle(
+    'admin-settings',
+    get_stylesheet_directory_uri() . '/assets/css/custom-admin-settings.css',
+    [],
+    1.1,
+    'all'
+))->enqueueOnAdmin()
+    ->enqueueOnFront()
+    ->enqueueOnSpecyficPage(["child_theme_admin-settings", "kontakt"])
+    ->excludeFromSpecyficPage(["kontakt"])
+    ->add();
+
+/* 
+    Enqueue CSS styles 
+    on specyfic FRONT page 
+*/
+$kontaktStyles = new EnqueStyle(
+    'kontakt',
+    get_stylesheet_directory_uri() . '/assets/css/custom-kontakt.css',
+    [],
+    1.1,
+    'all'
+);
+$kontaktStyles->enqueueOnSpecyficPage(["kontakt"])
+    ->add();
+
+/* 
+    Enqueue CSS styles 
+    on specyfic ADMIN page 
+*/
+$blogStepInPathStyles = (new EnqueStyle(
+    'blogsteps',
+    get_stylesheet_directory_uri() . '/assets/css/custom-blog--.css',
+    [],
+    1.1,
+    'all'
+))->enqueueOnSpecyficPage(["blog"]) // /blog
+    ->enqueueIfStepInPath(["blog"]) // all posts prepend with /blog/xyz...
+    ->add();
+
+/* *********************************** JS ENQUEUE SCRIPTS *************************************** */
+    
 /* Enqueue js scripts */
 (new EnqueScript(
     'script', // label
@@ -59,6 +107,7 @@ const MAINDIR = __DIR__;
     true // 
 ))->setVersion(1.1)->setDisableOnAdmin()->enqueue();
 
+/* *********************************** REGISTER USTOM POSTS *************************************** */
 /* Register custom post */
 new CustomPost();
 
@@ -71,6 +120,7 @@ $adminPage->renderPage(
     []
 );
 
+/* *********************************** ADD ADMIN SETTING PAGES *************************************** */
 /* Add Top Level Admin Menu Page shared subpage */
 $adminSubPage1 = new AdminMenuPage("Child Theme Admin", "$adminPage->slug", "Home", $adminPage->slug);
 
@@ -80,11 +130,13 @@ $adminSubPage2 = new AdminMenuPage("Theme Admin", "child_theme_admin-settings", 
 $adminSubPage2->renderPage(
     get_stylesheet_directory().'/View/Admin/main-setting-basics.php',
     [
+        "enqueue" => [],
         "demoSlug" => $adminSubPage2->slug,
         "form" => new Form($adminSubPage2->slug)
     ]
 );
 
+/* *********************************** REGISTER SHORTCODES *************************************** */
 /* Allow SVG Upload and Display */
 new AllowSVG();
 
