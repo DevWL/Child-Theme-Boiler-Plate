@@ -25,7 +25,8 @@ class EnqueStyle
 
     private $_enqueueOnAdmin = false;
     private $_enqueueOnFront = false;
-    private $_enqueueOnPageSlug = [];
+    private $_enqueueOnAdminPageSlug = [];
+    private $_enqueueOnFrontPageSlug = [];
     private $_hideOnPageSlug = [];
     private $_enqueueIfStepInPath = [];
 
@@ -57,24 +58,33 @@ class EnqueStyle
     }
 
     /**
-     * Enque styles
+     * Enque styles logic
      *
-     * @return void
+     * @return self
      */
     public function add()
     {
+        // var_dump("<pre>", $this);die();
+
         $this->_getContextURL();
-        
-        /* exclude from pages */
+
         $this->_hideOnPageSlug();
 
         $this->_enqueueIfStepInPath();
 
         $this->_enqueueOnAdminPageSlug();
 
+        $this->_enqueueOnFrontPageSlug();
+
         $this->_enqueueOnAdmin();
 
         $this->_enqueueOnFront();
+
+        // echo "<br>";
+        // echo $this->name . ": ";
+        // print_r(["_enqueueOnFrontPageSlug", $this->_enqueueOnFrontPageSlug]);
+
+        return $this;
     }
 
     /**
@@ -200,27 +210,45 @@ class EnqueStyle
     }
 
     /**
-     * Define on which page sug this style should to be loaded
+     * Define on which admin pages slug this style should to be loaded
      * NOTE! if defined dependencis will not be present in this area, styles will not load.
      *
      * @param string[] $enqueueOnPageSlug If true will not load in front area
      *
      * @return self
      */
-    public function setEnqueueOnSpecyficPage($_enqueueOnPageSlug = [])
+    public function setEnqueueOnAdminPage($_enqueueOnAdminPageSlug = [])
     {
-        if (is_string($_enqueueOnPageSlug)) {
-            $_enqueueOnPageSlug = [$_enqueueOnPageSlug];
+        if (is_string($_enqueueOnAdminPageSlug)) {
+            $_enqueueOnAdminPageSlug = [$_enqueueOnAdminPageSlug];
         }
-        $this->_enqueueOnPageSlug = array_unique(array_merge($_enqueueOnPageSlug, $this->_enqueueOnPageSlug));
-        $this->_enqueueOnPageSlug = $_enqueueOnPageSlug;
+        $this->_enqueueOnAdminPageSlug = array_unique(array_merge($_enqueueOnAdminPageSlug, $this->_enqueueOnAdminPageSlug));
+        // var_dump($this->_enqueueOnAdminPageSlug);die();
         return $this;
     }
 
     /**
+     * Define on which front pages slug this css style should to be loaded
+     * NOTE! if defined dependencis will not be present in this area, styles will not load.
+     *
+     * @param string|string[] $_enqueueOnFrontPageSlug If true will not load in front area
+     *
+     * @return self
+     */
+    public function setEnqueueOnFrontPage($_enqueueOnFrontPageSlug = [])
+    {
+        if (is_string($_enqueueOnFrontPageSlug)) {
+            $_enqueueOnFrontPageSlug = [$_enqueueOnFrontPageSlug];
+        }
+        $this->_enqueueOnFrontPageSlug = array_unique(array_merge($_enqueueOnFrontPageSlug, $this->_enqueueOnFrontPageSlug));
+        // var_dump("_enqueueOnFrontPageSlug", $this->_enqueueOnFrontPageSlug);die(); // shows OK
+        return $this;
+    }    
+
+    /**
      * Exclude loading off css on pages with slugs in this array
      *
-     * @param array $_hideOnPageSlug
+     * @param string|string[] $_hideOnPageSlug 
      *
      * @return self
      */
@@ -239,8 +267,8 @@ class EnqueStyle
      * for example /blog/xyz... where "blog" is a step
      * which need to match to load css
      *
-     * @param string[] $_enqueueIfStepInPath List of valid steps
-     *                                       which will triger enqueue of css
+     * @param string|string[] $_enqueueIfStepInPath List of valid steps
+     *                                              which will triger enqueue of css
      *
      * @return self
      */
@@ -263,7 +291,6 @@ class EnqueStyle
     {
         /** @var string $pageSlug Page url */
         $this->pageSlug= $_SERVER['REQUEST_URI'];
-        ;
         return $this->pageSlug;
     }
 
@@ -274,10 +301,10 @@ class EnqueStyle
      * 
      * @return boolean +sets $this->isAdmin
      */
-    private function _checkIfIsAdmin($pageSlug)
+    private function _checkIfIsAdmin()
     {
         /** @var boolean $this->isAdmin check if curently init on admin page looking at url */
-        $this->isAdmin = (strpos($pageSlug, "/wp-admin/admin.php") > -1);
+        $this->isAdmin = (strpos($this->pageSlug, "/wp-admin/admin.php") > -1);
         return $this->isAdmin;
     }
 
@@ -288,29 +315,29 @@ class EnqueStyle
      * 
      * @return string[]
      */
-    private function _getUrlParts($pageSlug)
+    private function _getUrlParts()
     {
         /** @var string[] $urlArrParts An array of url sections (path steps) */
-        $this->urlArrParts = explode("/", $pageSlug);
+        $this->urlArrParts = explode("/", $this->pageSlug);
         return $this->urlArrParts;
     }
 
     private function _getContextURL()
     {
         /** @var string $pageSlug Page url */
-        $pageSlug = $this->_getPageUrl();
+        $this->_getPageUrl();
 
         /** @var string[] $urlArrParts An array of url sections (path steps) */
-        $urlArrParts = $this->_getUrlParts($pageSlug);
+        $this->_getUrlParts();
 
         /** @var boolean $isAdmin check if curently init on admin page */
-        $isAdmin = $this->_checkIfIsAdmin($pageSlug);
+        $this->_checkIfIsAdmin();
     }
 
     private function _hideOnPageSlug()
     {
         $this->_getContextURL();
-
+        // var_dump("_hideOnPageSlug", $this->_hideOnPageSlug); die();
         if (!empty($this->_hideOnPageSlug)) {
 
             foreach ($this->_hideOnPageSlug as $value) {
@@ -345,7 +372,7 @@ class EnqueStyle
         $this->_getContextURL();
 
         if (!empty($this->_enqueueIfStepInPath)) {
-
+            // var_dump("_enqueueIfStepInPath", $this->_enqueueIfStepInPath); die();
             foreach ($this->_enqueueIfStepInPath as $value) {
 
                 if ($this->isAdmin) {
@@ -365,7 +392,8 @@ class EnqueStyle
                     $urlArrPartsCoppy = $this->urlArrParts;
 
                     /* return non empty elements */
-                    $urlPartsArrayWithoutEmpty = array_filter($urlArrPartsCoppy,
+                    $urlPartsArrayWithoutEmpty = array_filter(
+                        $urlArrPartsCoppy,
                         function ($v) {
                             if (!empty($v)) {
                                 return $v;
@@ -392,30 +420,35 @@ class EnqueStyle
     private function _enqueueOnAdminPageSlug()
     {
         $this->_getContextURL();
-
-        if (!empty($this->_enqueueOnAdminPageSlug)) {
-            foreach ($this->_enqueueOnPageSlug as $value) {
-
-                if ($this->isAdmin) {
-
-                    foreach ($this->urlArrParts as $v) {
-                        if (preg_match("/$value/", $v)) {
-
-                            add_action('admin_enqueue_scripts', [$this, 'enqueue']);
-                        }
-                    }
-                } else {
-
-                    foreach ($this->urlArrParts as $v) {
-                        if (preg_match("/$value/", $v)) {
-
-                            add_action('wp_enqueue_scripts', [$this, 'enqueue']);
-                        }
+        // var_dump($this->_enqueueOnAdminPageSlug); die();
+        if (!empty($this->_enqueueOnAdminPageSlug && $this->isAdmin)) {
+            foreach ($this->_enqueueOnAdminPageSlug as $value) {
+                foreach ($this->urlArrParts as $v) {
+                    if (preg_match("/$value/", $v)) {
+                        add_action('admin_enqueue_scripts', [$this, 'enqueue']);
                     }
                 }
             }
         }
     }
+
+    private function _enqueueOnFrontPageSlug()
+    {
+        $this->_getContextURL();
+        
+        if (!empty($this->_enqueueOnFrontPageSlug)) {
+            // var_dump($this->_enqueueOnFrontPageSlug);die();
+            foreach ($this->_enqueueOnFrontPageSlug as $value) {
+                foreach ($this->urlArrParts as $v) {
+                    var_dump("/$value/", "=========>", $this->urlArrParts, $v);
+                    if (preg_match("/$value/", $v)) {
+                        add_action('wp_enqueue_scripts', [$this, 'enqueue']);
+                    }
+                }
+            }
+        }
+    }    
+    
 
     private function _enqueueOnAdmin()
     {
@@ -431,4 +464,49 @@ class EnqueStyle
             add_action('wp_enqueue_scripts', [$this, 'enqueue']);
         }
     }
+
+    /** TODO - allow to load styles for specyfic post template */
+    public function setEnqueueForTempletParts($_v = [])
+    {
+
+    }
+
+    /** TODO - allow to load styles for specyfic post type */
+    public function setEnqueueforPostType($_v = [])
+    {
+
+    }
+
+    /** TODO - allow to load styles for specyfic category */
+    public function setEnqueueforPostCategory($_v = [])
+    {
+
+    }
+
+    /** TODO - allow to load styles for specyfic XYZ */
+    public function setEnqueueUrlRegex($_v = [])
+    {
+
+    }
+
+    /** TODO - allow to load styles for specyfic XYZ */
+    public function setEnqueueFrontUrlRegex($_v = [])
+    {
+
+    }
+
+    /** TODO - allow to load styles for specyfic XYZ */
+    public function setEnqueueAdminUrlRegex($_v = [])
+    {
+
+    }
+
+    /**
+     * TODO add loading script on page ID like = ([slug[], id[]])
+     * Napraw setEnqueueOnFrontPageSlug loading... 
+     *  https://wpplugin.dv/kontakt/ page shows empty array
+     *      not passing set value to wp callback! ... 
+     *      inspect "add" method -- see why it is not pronting the array
+     */
+
 }

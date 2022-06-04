@@ -15,7 +15,6 @@ use My\Lib\Helpers\WpForms\Form;
 use My\Lib\CustomPosts\CustomPost;
 // use My\Lib\Helpers\WpDebug\DebugWp;
 use My\Lib\AdminPages\AdminMenuPage;
-// use My\Lib\ShortCodes\NameShortcode;
 use My\Lib\ScriptsEnqueue\EnqueStyle;
 use My\Lib\ScriptsEnqueue\EnqueScript;
 use My\Lib\ShortCodes\GetOptionShortcode;
@@ -57,18 +56,17 @@ const MAINDIR = __DIR__;
     on specyfic ADMIN page 
 */
 $adminSettingsStyles = (
-    new EnqueStyle(
-        'admin-settings',
-        get_stylesheet_directory_uri() . '/assets/css/custom-admin-settings.css',
-        [],
-        1.1,
-        'all'
+        new EnqueStyle(
+            'admin-settings',
+            get_stylesheet_directory_uri() . '/assets/css/custom-admin-settings.css',
+            [],
+            1.1,
+            'all'
+        )
     )
-    )->setEnqueueOnAdmin()
-    ->setEnqueueOnFront()
     ->setEnqueueIfStepInPath(["blog"])
-    ->setEnqueueOnSpecyficPage(["child_theme_admin-settings", "kontakt"])
-    ->setExcludeFromSpecyficPage(["kontakt"])
+    ->setEnqueueOnFrontPage(["kontakt"])
+    ->setEnqueueOnAdminPage(["child_theme_admin-settings"])
     ->add();
 
 /* 
@@ -82,8 +80,9 @@ $kontaktStyles = new EnqueStyle(
     1.1,
     'all'
 );
-$kontaktStyles->setEnqueueOnSpecyficPage(["kontakt"])
-    ->add();
+$kontaktStyles->setEnqueueOnFrontPage(["kontakt"])->add();
+
+    // var_dump("<pre>",$kontaktStyles);die();
 
 /* 
     Enqueue CSS styles 
@@ -95,7 +94,7 @@ $blogStepInPathStyles = (new EnqueStyle(
     [],
     1.1,
     'all'
-))->setEnqueueOnSpecyficPage(["blog"]) // /blog
+))->setEnqueueOnFrontPage(["blog"]) // /blog
     ->setEnqueueIfStepInPath(["blog"]) // all posts prepend with /blog/xyz...
     ->add();
 
