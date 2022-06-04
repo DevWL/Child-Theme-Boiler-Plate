@@ -22,9 +22,9 @@ class EnqueStyle
     public $dependencies;
     public $version;
     public $media;
-    public $enqueueOnAdmin = false;
-    public $enqueueOnFront = false;
 
+    private $_enqueueOnAdmin = false;
+    private $_enqueueOnFront = false;
     private $_enqueueOnPageSlug = [];
     private $_hideOnPageSlug = [];
     private $_enqueueIfStepInPath = [];
@@ -35,7 +35,7 @@ class EnqueStyle
      * @param string           $name         Has to be unique!. Other way only the first declaration will be loaded
      * @param string           $path         Full Path to the css file
      * @param array            $dependencies Has to be fullfill for the script to load. Be sure to make dependencies accessible for that page.
-     * @param string|bool|null $version
+     * @param string|bool|null $version 
      * @param string           $media        Use Class OPTIONS_MEDIA const array
      *
      * @see WordPress wp_enqueue_style() function documentation
@@ -46,8 +46,8 @@ class EnqueStyle
         array $dependencies = [],
         $version = false,
         string $media = 'all',
-        bool $enqueueOnAdmin = false,
-        bool $enqueueOnFront = false
+        bool $_enqueueOnAdmin = false,
+        bool $_enqueueOnFront = false
     ) {
         $this->name = $name;
         $this->path = $path;
@@ -63,114 +63,18 @@ class EnqueStyle
      */
     public function add()
     {
-        /* get page url */
-        $pageSlug = $_SERVER['REQUEST_URI'];
+        $this->_getContextURL();
+        
+        /* exclude from pages */
+        $this->_hideOnPageSlug();
 
-        /* convert front url to path steps */
-        $urlArrParts = explode("/", $pageSlug);
+        $this->_enqueueIfStepInPath();
 
-        /* check if curently init on admin page */
-        $isAdmin = (strpos($pageSlug, "/wp-admin/admin.php") > -1);
+        $this->_enqueueOnAdminPageSlug();
 
-        if (!empty($this->_hideOnPageSlug)) {
-            foreach ($this->_hideOnPageSlug as $value) {
-                $isAdmin = (strpos($pageSlug, "/wp-admin/admin.php") > -1);
+        $this->_enqueueOnAdmin();
 
-                if ($isAdmin) {
-                    $matches = null;
-
-                    foreach ($urlArrParts as $v) {
-                        if (preg_match("/$value/", $v)) {
-
-                            return;
-                        }
-                    }
-                } else {
-
-                    foreach ($urlArrParts as $v) {
-                        if (preg_match("/$value/", $v)) {
-
-                            return;
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!empty($this->_enqueueIfStepInPath)) {
-
-            foreach ($this->_enqueueIfStepInPath as $value) {
-
-                if ($isAdmin) {
-                    $matches = null;
-
-                    /* split admin url by "-" and not by "_" for steps maping */
-                    $adminPathUrlSteps = explode("-", $matches[0]);
-
-                    foreach ($adminPathUrlSteps as $v) {
-                        if ($value === $v) {
-                            add_action('admin_enqueue_scripts', [$this, 'enqueue']);
-                        }
-
-                    }
-                } else {
-
-                    $urlPartsArrayWithoutLast = $urlArrParts;
-
-                    /* return non empty elements */
-                    $urlPartsArrayWithoutLast = array_filter($urlPartsArrayWithoutLast,
-                        function ($v) {
-                            if (!empty($v)) {
-                                return $v;
-                            }
-                        }
-                    );
-
-                    /* remove last element - current page slug name */
-                    array_pop($urlPartsArrayWithoutLast);
-
-                    /* loop over site url steps and search for the value */
-                    foreach ($urlPartsArrayWithoutLast as $v) {
-                        if (preg_match("/$value/", $v)) {
-
-                            add_action('wp_enqueue_scripts', [$this, 'enqueue']);
-                        }
-                    }
-                }
-            }
-        }
-
-        if (!empty($this->_enqueueOnPageSlug)) {
-            foreach ($this->_enqueueOnPageSlug as $value) {
-
-                if ($isAdmin) {
-
-                    foreach ($urlArrParts as $v) {
-                        if (preg_match("/$value/", $v)) {
-
-                            add_action('admin_enqueue_scripts', [$this, 'enqueue']);
-                        }
-                    }
-                } else {
-
-                    foreach ($urlArrParts as $v) {
-                        if (preg_match("/$value/", $v)) {
-
-                            add_action('wp_enqueue_scripts', [$this, 'enqueue']);
-                        }
-                    }
-                }
-            }
-        }
-
-        if ($this->enqueueOnAdmin === true) {
-            var_dump($this->enqueueOnAdmin, $urlArrParts);
-            add_action('admin_enqueue_scripts', [$this, 'enqueue']);
-        }
-
-        if ($this->enqueueOnFront === true) {
-            add_action('wp_enqueue_scripts', [$this, 'enqueue']);
-        }
+        $this->_enqueueOnFront();
     }
 
     /**
@@ -269,13 +173,13 @@ class EnqueStyle
      * Set this to "true" if you wish to load script on admin area
      * NOTE! if defined dependencis will not be present in this area, styles will not load.
      *
-     * @param bool $enqueueOnAdmin If true will not load in admin area
+     * @param bool $_enqueueOnAdmin If true will not load in admin area
      *
      * @return self
      */
-    public function enqueueOnAdmin($enqueueOnAdmin = true)
+    public function setEnqueueOnAdmin($_enqueueOnAdmin = true)
     {
-        $this->enqueueOnAdmin = $enqueueOnAdmin;
+        $this->enqueueOnAdmin = $_enqueueOnAdmin;
 
         return $this;
     }
@@ -284,13 +188,13 @@ class EnqueStyle
      * Set this to "true" if you wish to load script on frontend
      * NOTE! if defined dependencis will not be present in this area, styles will not load.
      *
-     * @param bool $enqueueOnFront If true will not load in front area
+     * @param bool $_enqueueOnFront If true will not load in front area
      *
      * @return self
      */
-    public function enqueueOnFront($enqueueOnFront = true)
+    public function setEnqueueOnFront($_enqueueOnFront = true)
     {
-        $this->enqueueOnFront = $enqueueOnFront;
+        $this->enqueueOnFront = $_enqueueOnFront;
 
         return $this;
     }
@@ -303,7 +207,7 @@ class EnqueStyle
      *
      * @return self
      */
-    public function enqueueOnSpecyficPage($_enqueueOnPageSlug = [])
+    public function setEnqueueOnSpecyficPage($_enqueueOnPageSlug = [])
     {
         if (is_string($_enqueueOnPageSlug)) {
             $_enqueueOnPageSlug = [$_enqueueOnPageSlug];
@@ -320,7 +224,7 @@ class EnqueStyle
      *
      * @return self
      */
-    public function excludeFromSpecyficPage($_hideOnPageSlug = [])
+    public function setExcludeFromSpecyficPage($_hideOnPageSlug = [])
     {
         if (is_string($_hideOnPageSlug)) {
             $_hideOnPageSlug = [$_hideOnPageSlug];
@@ -331,16 +235,16 @@ class EnqueStyle
     }
 
     /**
-     * Enqueue css styles only if there is a step in a path 
-     * for example /blog/xyz... where "blog" is a step 
+     * Enqueue css styles only if there is a step in a path
+     * for example /blog/xyz... where "blog" is a step
      * which need to match to load css
      *
-     * @param string[] $_enqueueIfStepInPath List of valid steps 
+     * @param string[] $_enqueueIfStepInPath List of valid steps
      *                                       which will triger enqueue of css
-     * 
-     * @return self 
+     *
+     * @return self
      */
-    public function enqueueIfStepInPath($_enqueueIfStepInPath = [])
+    public function setEnqueueIfStepInPath($_enqueueIfStepInPath = [])
     {
         if (is_string($_enqueueIfStepInPath)) {
             $_enqueueIfStepInPath = [$_enqueueIfStepInPath];
@@ -348,5 +252,183 @@ class EnqueStyle
         $this->_enqueueIfStepInPath = array_unique(array_merge($_enqueueIfStepInPath, $this->_enqueueIfStepInPath));
         $this->_enqueueIfStepInPath = $_enqueueIfStepInPath;
         return $this;
+    }
+
+    /**
+     * Return Page Url ($_SERVER['REQUEST_URI'])
+     *
+     * @return string
+     */
+    private function _getPageUrl()
+    {
+        /** @var string $pageSlug Page url */
+        $this->pageSlug= $_SERVER['REQUEST_URI'];
+        ;
+        return $this->pageSlug;
+    }
+
+    /**
+     * Check if page is admin based on page URL
+     *
+     * @param string $pageSlug URL string
+     * 
+     * @return boolean +sets $this->isAdmin
+     */
+    private function _checkIfIsAdmin($pageSlug)
+    {
+        /** @var boolean $this->isAdmin check if curently init on admin page looking at url */
+        $this->isAdmin = (strpos($pageSlug, "/wp-admin/admin.php") > -1);
+        return $this->isAdmin;
+    }
+
+    /**
+     * Splits URL to array chunks (URL steps);
+     *
+     * @param string $pageSlug URL string
+     * 
+     * @return string[]
+     */
+    private function _getUrlParts($pageSlug)
+    {
+        /** @var string[] $urlArrParts An array of url sections (path steps) */
+        $this->urlArrParts = explode("/", $pageSlug);
+        return $this->urlArrParts;
+    }
+
+    private function _getContextURL()
+    {
+        /** @var string $pageSlug Page url */
+        $pageSlug = $this->_getPageUrl();
+
+        /** @var string[] $urlArrParts An array of url sections (path steps) */
+        $urlArrParts = $this->_getUrlParts($pageSlug);
+
+        /** @var boolean $isAdmin check if curently init on admin page */
+        $isAdmin = $this->_checkIfIsAdmin($pageSlug);
+    }
+
+    private function _hideOnPageSlug()
+    {
+        $this->_getContextURL();
+
+        if (!empty($this->_hideOnPageSlug)) {
+
+            foreach ($this->_hideOnPageSlug as $value) {
+                $isAdmin = (strpos($this->pageSlug, "/wp-admin/admin.php") > -1);
+                if ($isAdmin) {
+                    $matches = null;
+
+                    foreach ($this->urlArrParts as $v) {
+                        if (preg_match("/$value/", $v)) {
+                            return;
+                        }
+                    }
+                } else {
+
+                    foreach ($this->urlArrParts as $v) {
+                        if (preg_match("/$value/", $v)) {
+                            return;
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * Check if _enqueueIfStepInPath is not empty and enqueue the CSS styles
+     *
+     * @return void
+     */
+    private function _enqueueIfStepInPath()
+    {
+        $this->_getContextURL();
+
+        if (!empty($this->_enqueueIfStepInPath)) {
+
+            foreach ($this->_enqueueIfStepInPath as $value) {
+
+                if ($this->isAdmin) {
+                    $matches = null;
+
+                    /* split admin url by "-" and not by "_" for steps maping */
+                    $adminPathUrlSteps = explode("-", $matches[0]);
+
+                    foreach ($adminPathUrlSteps as $v) {
+                        if ($value === $v) {
+                            add_action('admin_enqueue_scripts', [$this, 'enqueue']);
+                        }
+
+                    }
+                } else {
+
+                    $urlArrPartsCoppy = $this->urlArrParts;
+
+                    /* return non empty elements */
+                    $urlPartsArrayWithoutEmpty = array_filter($urlArrPartsCoppy,
+                        function ($v) {
+                            if (!empty($v)) {
+                                return $v;
+                            }
+                        }
+                    );
+
+                    /* remove last element - current page slug name */
+                    array_pop($urlPartsArrayWithoutEmpty); // edited by reference
+                    $urlPartsArrayWithoutEmptyMinusLast = $urlPartsArrayWithoutEmpty;
+
+                    /* loop over site url steps and search for the value */
+                    foreach ($urlPartsArrayWithoutEmptyMinusLast as $v) {
+                        if (preg_match("/$value/", $v)) {
+
+                            add_action('wp_enqueue_scripts', [$this, 'enqueue']);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private function _enqueueOnAdminPageSlug()
+    {
+        $this->_getContextURL();
+
+        if (!empty($this->_enqueueOnAdminPageSlug)) {
+            foreach ($this->_enqueueOnPageSlug as $value) {
+
+                if ($this->isAdmin) {
+
+                    foreach ($this->urlArrParts as $v) {
+                        if (preg_match("/$value/", $v)) {
+
+                            add_action('admin_enqueue_scripts', [$this, 'enqueue']);
+                        }
+                    }
+                } else {
+
+                    foreach ($this->urlArrParts as $v) {
+                        if (preg_match("/$value/", $v)) {
+
+                            add_action('wp_enqueue_scripts', [$this, 'enqueue']);
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    private function _enqueueOnAdmin()
+    {
+        if ($this->enqueueOnAdmin === true) {
+            // var_dump($this->enqueueOnAdmin, $urlArrParts);
+            add_action('admin_enqueue_scripts', [$this, 'enqueue']);
+        }
+    }
+
+    private function _enqueueOnFront()
+    {
+        if ($this->enqueueOnFront === true) {
+            add_action('wp_enqueue_scripts', [$this, 'enqueue']);
+        }
     }
 }

@@ -32,7 +32,7 @@ const MAINDIR = __DIR__;
 (new EnqueStyle(
     'parent-style',
     get_template_directory_uri() . '/style.css'
-))->setVersion(1.1)->enqueueOnFront()->add();
+))->setVersion(1.1)->setEnqueueOnFront()->add();
 
 /* Enqueue css styles on frontend */
 (new EnqueStyle(
@@ -41,7 +41,7 @@ const MAINDIR = __DIR__;
     ['parent-style'],
     1.1,
     'all'
-))->enqueueOnFront()->add();
+))->setEnqueueOnFront()->add();
 
 /* Enqueue css styles in admin area */
 (new EnqueStyle(
@@ -50,7 +50,7 @@ const MAINDIR = __DIR__;
     [],
     1.1,
     'all'
-))->enqueueOnAdmin()->add();
+))->setEnqueueOnAdmin()->add();
 
 /* 
     Enqueue CSS styles 
@@ -64,11 +64,11 @@ $adminSettingsStyles = (
         1.1,
         'all'
     )
-    )->enqueueOnAdmin()
-    ->enqueueOnFront()
-    ->enqueueIfStepInPath(["blog"])
-    ->enqueueOnSpecyficPage(["child_theme_admin-settings", "kontakt"])
-    ->excludeFromSpecyficPage(["kontakt"])
+    )->setEnqueueOnAdmin()
+    ->setEnqueueOnFront()
+    ->setEnqueueIfStepInPath(["blog"])
+    ->setEnqueueOnSpecyficPage(["child_theme_admin-settings", "kontakt"])
+    ->setExcludeFromSpecyficPage(["kontakt"])
     ->add();
 
 /* 
@@ -82,7 +82,7 @@ $kontaktStyles = new EnqueStyle(
     1.1,
     'all'
 );
-$kontaktStyles->enqueueOnSpecyficPage(["kontakt"])
+$kontaktStyles->setEnqueueOnSpecyficPage(["kontakt"])
     ->add();
 
 /* 
@@ -95,8 +95,8 @@ $blogStepInPathStyles = (new EnqueStyle(
     [],
     1.1,
     'all'
-))->enqueueOnSpecyficPage(["blog"]) // /blog
-    ->enqueueIfStepInPath(["blog"]) // all posts prepend with /blog/xyz...
+))->setEnqueueOnSpecyficPage(["blog"]) // /blog
+    ->setEnqueueIfStepInPath(["blog"]) // all posts prepend with /blog/xyz...
     ->add();
 
 /* *********************************** JS ENQUEUE SCRIPTS *************************************** */
