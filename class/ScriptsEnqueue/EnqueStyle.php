@@ -507,6 +507,13 @@ class EnqueStyle
      *  https://wpplugin.dv/kontakt/ page shows empty array
      *      not passing set value to wp callback! ... 
      *      inspect "add" method -- see why it is not pronting the array
+     * 
+     * IMPLEMENT setEnqueueForTempletParts
+     * IMPLEMENT setEnqueueforPostType
+     * IMPLEMENT setEnqueueforPostCategory
+     * IMPLEMENT setEnqueueUrlRegex
+     * IMPLEMENT setEnqueueFrontUrlRegex
+     * IMPLEMENT setEnqueueAdminUrlRegex
      */
 
 }
